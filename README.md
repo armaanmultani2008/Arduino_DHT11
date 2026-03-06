@@ -133,23 +133,3 @@ garantisce che i dati non vengano mai letti a meta', sincronizzando
 implicitamente i due sistemi anche se girano a velocita' diverse.
 
 ---
-
-## Dipendenze Python
-
-- pyserial
-- dearpygui
-
-Installazione:
-
-uv add pyserial dearpygui
-
----
-
-## Avvio
-
-1. Caricare il codice su Arduino tramite Arduino IDE
-2. Chiudere il Serial Monitor di Arduino IDE
-3. Verificare la porta COM corretta e aggiornarla in monitor.py
-4. Avviare l'applicazione Python:
-
-uv run monitor.py
