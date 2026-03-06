@@ -17,8 +17,8 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 const int SOGLIA_CALDA = 25;
 const int SOGLIA_FREDDA = 15;
-const int POT_TEMP_MIN = 15;
-const int POT_TEMP_MAX = 25;
+const int POT_TEMP_MIN = 10;
+const int POT_TEMP_MAX = 30;
 const int SOGLIA_UMIDO = 60;
 const int SOGLIA_ARIDO = 40;
 
@@ -130,7 +130,7 @@ void aggiornaLCD() {
         if(apri_finestre) stampaRiga(1, "Finestre aperte");
         else stampaRiga(1, "Apri finestre!");
       } else if (temperaturaAttuale <= SOGLIA_FREDDA) {
-        if(riscaldamento) stampaRiga(1, "Risc. acceso")
+        if(riscaldamento) stampaRiga(1, "Risc. acceso");
       } else {
         if (riscaldamento) stampaRiga(1, "Risc. acceso");
         else if (apri_finestre) stampaRiga(1, "Finestre aperte");
@@ -147,10 +147,10 @@ void aggiornaLCD() {
     case 3:
       if (umiditaAttuale > SOGLIA_UMIDO) {
         if(deumidificatore) stampaRiga(1, "Deumidif. acceso");
-        else stampaRiga(1, "Accendi deumidif.!")
+        else stampaRiga(1, "Accendi deumidif.!");
       } else if (umiditaAttuale < SOGLIA_ARIDO) {
-        if(umidificatore) stampaRiga(1, "Umidif. acceso")
-        else stampaRiga(1, "Accendi umidif.!")
+        if(umidificatore) stampaRiga(1, "Umidif. acceso");
+        else stampaRiga(1, "Accendi umidif.!");
       } else {
         stampaRiga(1, "Umid: " + String(umiditaAttuale, 1) + "%");
       }
@@ -160,7 +160,7 @@ void aggiornaLCD() {
   paginaLCD = (paginaLCD + 1) % 4; 
 }
 
-void stampaSeriale(float t, float h) {
+void stampaSeriale(float t, float h, float tScelta) {
   String statoTemp;
   if (t >= SOGLIA_CALDA) statoTemp = "CALDO";
   else if (t <= SOGLIA_FREDDA) statoTemp = "FREDDO";
@@ -172,6 +172,8 @@ void stampaSeriale(float t, float h) {
   else statoUm = "OK";
 
   Serial.print(t, 1);                             
+  Serial.print(",");
+  Serial.print(tScelta);
   Serial.print(",");
   Serial.print(h, 1);                             
   Serial.print(",");
@@ -205,11 +207,11 @@ void loop() {
 
     if (!isnan(t) && !isnan(h)) {
       temperaturaAttuale = t;
-      umiditaAttuale     = h;
+      umiditaAttuale = h;
       aggiornaLED_Buzzer(t);
       aggiornaStatoTemperatura(t);
       aggiornaStatoUmidita(h);
-      stampaSeriale(t, h);
+      stampaSeriale(t, h, temperaturaScelta);
     } else {
       Serial.println("ERRORE,0,0,0,0,0,0,0");
     }
