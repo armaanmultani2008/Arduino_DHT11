@@ -267,7 +267,7 @@ def aggiorna_gui():
 # ==============================================================================
 def build_gui():
     dpg.create_context()
-    dpg.create_viewport(title="Monitor Ambientale", width=920, height=720, resizable=False)
+    dpg.create_viewport(title="Monitor Ambientale", width=920, height=720, resizable=True)
     dpg.setup_dearpygui()
 
     with dpg.theme() as tema:
