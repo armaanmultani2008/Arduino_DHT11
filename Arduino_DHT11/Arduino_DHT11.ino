@@ -29,7 +29,7 @@ unsigned long ultimoTempoLCD = 0;
 
 float temperaturaAttuale = NAN;
 float umiditaAttuale = NAN;
-int   temperaturaScelta  = 20;
+int temperaturaScelta  = 20;
 
 bool riscaldamento = false;
 bool apri_finestre = false;

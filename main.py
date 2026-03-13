@@ -19,33 +19,33 @@ import dearpygui.dearpygui as dpg
 # ==============================================================================
 # CONFIGURAZIONE
 # ==============================================================================
-FILE_CSV          = "storico.csv"
+FILE_CSV = "storico.csv"
 MAX_PUNTI_GRAFICO = 60
 
-SOGLIA_CALDA  = 25.0
+SOGLIA_CALDA = 25.0
 SOGLIA_FREDDA = 15.0
-SOGLIA_UMIDO  = 60.0
-SOGLIA_ARIDO  = 40.0
+SOGLIA_UMIDO = 60.0
+SOGLIA_ARIDO = 40.0
 
 
 # ==============================================================================
 # VARIABILI GLOBALI CONDIVISE TRA I THREAD
 # ==============================================================================
 dati_queue = queue.Queue()
-lock       = threading.Lock()
+lock = threading.Lock()
 
-temperatura     = None
-temp_scelta     = None
-umidita         = None
-stato_temp      = "---"
-stato_um        = "---"
-riscaldamento   = "OFF"
-finestre        = "OFF"
+temperatura = None
+temp_scelta = None
+umidita = None
+stato_temp = "---"
+stato_um = "---"
+riscaldamento = "OFF"
+finestre = "OFF"
 deumidificatore = "OFF"
-umidificatore   = "OFF"
+umidificatore = "OFF"
 
-lista_temp  = []
-lista_hum   = []
+lista_temp = []
+lista_hum = []
 lista_tempo = []
 
 tempo_avvio = time.time()
@@ -130,7 +130,6 @@ def consumatore():
     while True:
         riga = dati_queue.get()
 
-        # Formato atteso: temp,temp_scelta,umidita,stato_temp,risc,fin,stato_um,deum,umid
         parti = riga.split(",")
 
         if len(parti) != 9:
@@ -139,24 +138,24 @@ def consumatore():
             continue
 
         try:
-            temp_letta    = float(parti[0])
+            temp_letta = float(parti[0])
             tscelta_letta = float(parti[1])
-            hum_letta     = float(parti[2])
+            hum_letta = float(parti[2])
         except ValueError:
             print(f"[CONSUMATORE] Valori non numerici, scartati: {riga}")
             dati_queue.task_done()
             continue
 
         with lock:
-            temperatura     = temp_letta
-            temp_scelta     = tscelta_letta
-            umidita         = hum_letta
-            stato_temp      = parti[3].strip()
-            riscaldamento   = parti[4].strip()
-            finestre        = parti[5].strip()
-            stato_um        = parti[6].strip()
+            temperatura = temp_letta
+            temp_scelta = tscelta_letta
+            umidita = hum_letta
+            stato_temp = parti[3].strip()
+            riscaldamento = parti[4].strip()
+            finestre = parti[5].strip()
+            stato_um = parti[6].strip()
             deumidificatore = parti[7].strip()
-            umidificatore   = parti[8].strip()
+            umidificatore = parti[8].strip()
 
             t_relativo = time.time() - tempo_avvio
             lista_temp.append(temperatura)
@@ -170,15 +169,15 @@ def consumatore():
 
         if time.time() - ultimo_salvataggio >= 10:
             salva_csv({
-                "temperatura":    temperatura,
-                "temp_scelta":    temp_scelta,
-                "umidita":        umidita,
-                "stato_temp":     stato_temp,
-                "riscaldamento":  riscaldamento,
-                "finestre":       finestre,
-                "stato_um":       stato_um,
-                "deumidificatore":deumidificatore,
-                "umidificatore":  umidificatore
+                "temperatura": temperatura,
+                "temp_scelta": temp_scelta,
+                "umidita": umidita,
+                "stato_temp": stato_temp,
+                "riscaldamento": riscaldamento,
+                "finestre": finestre,
+                "stato_um": stato_um,
+                "deumidificatore": deumidificatore,
+                "umidificatore": umidificatore
             })
             ultimo_salvataggio = time.time()
             print(f"[CONSUMATORE] Salvato: T={temperatura}°C  Tscelta={temp_scelta}°C  H={umidita}%")
@@ -191,26 +190,26 @@ def consumatore():
 # ==============================================================================
 def aggiorna_gui():
     with lock:
-        temp    = temperatura
+        temp = temperatura
         tscelta = temp_scelta
-        hum     = umidita
-        st      = stato_temp
-        su      = stato_um
-        risc    = riscaldamento
-        fin     = finestre
-        deum    = deumidificatore
-        umid    = umidificatore
-        t_list    = list(lista_tempo)
+        hum = umidita
+        st = stato_temp
+        su = stato_um
+        risc = riscaldamento
+        fin = finestre
+        deum = deumidificatore
+        umid = umidificatore
+        t_list = list(lista_tempo)
         temp_list = list(lista_temp)
-        hum_list  = list(lista_hum)
+        hum_list = list(lista_hum)
 
     if temp is None:
         return
 
     # ── Valori numerici ───────────────────────────────────────────────────────
-    dpg.set_value("txt_temp",    f"{temp:.1f} °C")
+    dpg.set_value("txt_temp", f"{temp:.1f} °C")
     dpg.set_value("txt_tscelta", f"{tscelta:.1f} °C")
-    dpg.set_value("txt_hum",     f"{hum:.1f} %")
+    dpg.set_value("txt_hum", f"{hum:.1f} %")
 
     # ── Stato temperatura ─────────────────────────────────────────────────────
     if st == "CALDO":
@@ -243,9 +242,9 @@ def aggiorna_gui():
     # ── Indicatori ON/OFF ─────────────────────────────────────────────────────
     for tag, etichetta, valore in [
         ("ind_risc", "RISCALDAMENTO", risc),
-        ("ind_fin",  "FINESTRE",      fin),
-        ("ind_deum", "DEUMIDIF.",     deum),
-        ("ind_umid", "UMIDIFIC.",     umid),
+        ("ind_fin", "FINESTRE", fin),
+        ("ind_deum", "DEUMIDIF.", deum),
+        ("ind_umid", "UMIDIFIC.", umid),
     ]:
         if valore == "ON":
             dpg.set_value(tag, f"● {etichetta}: ON")
@@ -257,7 +256,7 @@ def aggiorna_gui():
     # ── Grafici ───────────────────────────────────────────────────────────────
     if t_list:
         dpg.set_value("serie_temp", [t_list, temp_list])
-        dpg.set_value("serie_hum",  [t_list, hum_list])
+        dpg.set_value("serie_hum", [t_list, hum_list])
         dpg.fit_axis_data("asse_x")
         dpg.fit_axis_data("asse_y_temp")
         dpg.fit_axis_data("asse_y_hum")
@@ -268,31 +267,28 @@ def aggiorna_gui():
 # ==============================================================================
 def build_gui():
     dpg.create_context()
-    dpg.create_viewport(title="Monitor Ambientale", width=920, height=720,
-                        resizable=False)
+    dpg.create_viewport(title="Monitor Ambientale", width=920, height=720, resizable=False)
     dpg.setup_dearpygui()
 
     with dpg.theme() as tema:
         with dpg.theme_component(dpg.mvAll):
-            dpg.add_theme_color(dpg.mvThemeCol_WindowBg, (18,  18,  28,  255))
-            dpg.add_theme_color(dpg.mvThemeCol_ChildBg,  (28,  28,  42,  255))
-            dpg.add_theme_color(dpg.mvThemeCol_Text,     (220, 220, 240, 255))
-            dpg.add_theme_color(dpg.mvThemeCol_Border,   (60,  60,  90,  255))
+            dpg.add_theme_color(dpg.mvThemeCol_WindowBg, (18, 18, 28, 255))
+            dpg.add_theme_color(dpg.mvThemeCol_ChildBg, (28, 28, 42, 255))
+            dpg.add_theme_color(dpg.mvThemeCol_Text, (220, 220, 240, 255))
+            dpg.add_theme_color(dpg.mvThemeCol_Border, (60,  60,  90,  255))
             dpg.add_theme_style(dpg.mvStyleVar_ChildRounding, 6)
             dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 12, 10)
-            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing,    8,  6)
+            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 8, 6)
     dpg.bind_theme(tema)
 
     # Funzione helper per creare tema colore per le linee soglia
     def crea_tema_soglia(colore):
         with dpg.theme() as t:
             with dpg.theme_component(dpg.mvInfLineSeries):
-                dpg.add_theme_color(dpg.mvPlotCol_Line, colore,
-                                    category=dpg.mvThemeCat_Plots)
+                dpg.add_theme_color(dpg.mvPlotCol_Line, colore, category=dpg.mvThemeCat_Plots)
         return t
 
-    with dpg.window(tag="finestra", no_close=True, no_move=True,
-                    no_resize=True, no_title_bar=True):
+    with dpg.window(tag="finestra", no_close=True, no_move=True, no_resize=True, no_title_bar=True):
 
         dpg.add_text("Monitor Efficienza Energetica", color=(80, 200, 100, 255))
         dpg.add_separator()
@@ -310,8 +306,7 @@ def build_gui():
                     dpg.add_spacer(width=4)
                     dpg.add_text("-- °C", tag="txt_tscelta", color=(220, 220, 240, 255))
                 dpg.add_spacer(height=4)
-                dpg.add_text("In attesa di dati...", tag="txt_sug_temp",
-                             color=(130, 130, 150, 255), wrap=425)
+                dpg.add_text("In attesa di dati...", tag="txt_sug_temp", color=(130, 130, 150, 255), wrap=425)
 
             dpg.add_spacer(width=8)
 
@@ -319,8 +314,7 @@ def build_gui():
                 dpg.add_text("UMIDITA'", color=(130, 130, 150, 255))
                 dpg.add_text("-- %", tag="txt_hum", color=(220, 220, 240, 255))
                 dpg.add_spacer(height=4)
-                dpg.add_text("In attesa di dati...", tag="txt_sug_um",
-                             color=(130, 130, 150, 255), wrap=425)
+                dpg.add_text("In attesa di dati...", tag="txt_sug_um", color=(130, 130, 150, 255), wrap=425)
 
         dpg.add_spacer(height=10)
 
@@ -331,13 +325,12 @@ def build_gui():
         with dpg.group(horizontal=True):
             for tag, etichetta in [
                 ("ind_risc", "RISCALDAMENTO"),
-                ("ind_fin",  "FINESTRE"),
+                ("ind_fin", "FINESTRE"),
                 ("ind_deum", "DEUMIDIF."),
                 ("ind_umid", "UMIDIFIC."),
             ]:
                 with dpg.child_window(width=212, height=36, border=True):
-                    dpg.add_text(f"○ {etichetta}: OFF", tag=tag,
-                                 color=(130, 130, 150, 255))
+                    dpg.add_text(f"○ {etichetta}: OFF", tag=tag, color=(130, 130, 150, 255))
                 dpg.add_spacer(width=4)
 
         dpg.add_spacer(height=10)
@@ -353,32 +346,24 @@ def build_gui():
             dpg.add_plot_axis(dpg.mvXAxis, label="Tempo (s)", tag="asse_x")
 
             # Asse sinistro: temperatura
-            with dpg.plot_axis(dpg.mvYAxis, label="Temperatura (°C)",
-                               tag="asse_y_temp"):
-                dpg.add_line_series([], [], label="Temperatura °C",
-                                    tag="serie_temp")
+            with dpg.plot_axis(dpg.mvYAxis, label="Temperatura (°C)", tag="asse_y_temp"):
+                dpg.add_line_series([], [], label="Temperatura °C", tag="serie_temp")
 
-                s_calda = dpg.add_inf_line_series([SOGLIA_CALDA],
-                    label=f"Soglia calda ({SOGLIA_CALDA}°C)", horizontal=True)
+                s_calda = dpg.add_inf_line_series([SOGLIA_CALDA], label=f"Soglia calda ({SOGLIA_CALDA}°C)", horizontal=True)
                 dpg.bind_item_theme(s_calda, crea_tema_soglia((220, 70, 70, 180)))
 
-                s_fredda = dpg.add_inf_line_series([SOGLIA_FREDDA],
-                    label=f"Soglia fredda ({SOGLIA_FREDDA}°C)", horizontal=True)
+                s_fredda = dpg.add_inf_line_series([SOGLIA_FREDDA], label=f"Soglia fredda ({SOGLIA_FREDDA}°C)", horizontal=True)
                 dpg.bind_item_theme(s_fredda, crea_tema_soglia((80, 140, 220, 180)))
 
             # Asse destro: umidità
-            with dpg.plot_axis(dpg.mvYAxis, label="Umidita' (%)",
-                               tag="asse_y_hum", no_gridlines=True):
+            with dpg.plot_axis(dpg.mvYAxis, label="Umidita' (%)", tag="asse_y_hum", no_gridlines=True):
                 dpg.set_axis_limits("asse_y_hum", 0, 100)
-                dpg.add_line_series([], [], label="Umidita' %",
-                                    tag="serie_hum")
+                dpg.add_line_series([], [], label="Umidita' %", tag="serie_hum")
 
-                s_umido = dpg.add_inf_line_series([SOGLIA_UMIDO],
-                    label=f"Soglia umida ({SOGLIA_UMIDO}%)", horizontal=True)
+                s_umido = dpg.add_inf_line_series([SOGLIA_UMIDO], label=f"Soglia umida ({SOGLIA_UMIDO}%)", horizontal=True)
                 dpg.bind_item_theme(s_umido, crea_tema_soglia((60, 200, 200, 180)))
 
-                s_arido = dpg.add_inf_line_series([SOGLIA_ARIDO],
-                    label=f"Soglia secca ({SOGLIA_ARIDO}%)", horizontal=True)
+                s_arido = dpg.add_inf_line_series([SOGLIA_ARIDO], label=f"Soglia secca ({SOGLIA_ARIDO}%)", horizontal=True)
                 dpg.bind_item_theme(s_arido, crea_tema_soglia((220, 140, 60, 180)))
 
     dpg.set_primary_window("finestra", True)
@@ -398,7 +383,7 @@ if __name__ == "__main__":
     inizializza_csv()
     carica_storico()
 
-    t1 = threading.Thread(target=produttore,  daemon=True)
+    t1 = threading.Thread(target=produttore, daemon=True)
     t1.start()
 
     t2 = threading.Thread(target=consumatore, daemon=True)
